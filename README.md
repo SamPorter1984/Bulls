@@ -32,12 +32,12 @@ pragma solidity ^0.8.17;
 import './Bulls.sol';
 
 contract LibTest {
-    using {Bulls.extractBooleans} for uint;
-    using {Bulls.packBooleans} for bool[];
+    using {Bulls.extBools} for uint;
+    using {Bulls.packBools} for bool[];
 
     function testPackBooleans(bool[] memory bools) public pure returns (bool[] memory) {
-        uint uintBools = bools.packBooleans();
-        return uintBools.extractBooleans();
+        uint uintBools = bools.packBools();
+        return uintBools.extBools();
     }
 }
 ```
@@ -53,8 +53,8 @@ contract LibTest {
     using Bulls for bool[];
 
     function testPackBooleans(bool[] memory bools) public pure returns (bool[] memory) {
-        uint uintBools = bools.packBooleans();
-        return uintBools.extractBooleans();
+        uint uintBools = bools.packBools();
+        return uintBools.extBools();
     }
 }
 ```

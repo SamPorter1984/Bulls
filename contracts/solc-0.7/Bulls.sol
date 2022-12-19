@@ -4,7 +4,7 @@
 pragma solidity ^0.7.6;
 
 library Bulls {
-    function packBooleans(bool[] memory bools) internal pure returns (uint z) {
+    function packBools(bool[] memory bools) internal pure returns (uint z) {
         if (bools[0]) {
             z += 1;
         }

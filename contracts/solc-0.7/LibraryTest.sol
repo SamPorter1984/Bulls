@@ -8,7 +8,7 @@ contract LibTest {
     using Bulls for bool[];
 
     function testPackBooleans(bool[] memory bools) public pure returns (bool[] memory) {
-        uint uintBools = bools.packBooleans();
+        uint uintBools = bools.packBools();
         return uintBools.extBools();
     }
 
@@ -16,7 +16,7 @@ contract LibTest {
     bool[] sstoreBools;
 
     function sstoreUintGasTest(bool[] memory bools) public {
-        sstoreTest = bools.packBooleans();
+        sstoreTest = bools.packBools();
     }
 
     function sstoreBoolsGasTest(bool[] memory bools) public {
