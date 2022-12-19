@@ -1,6 +1,6 @@
 # Bulls library
 
-It can pack and unpack booleans in uints making it up to 3x-4x cheaper.
+It can pack and unpack booleans in uints making it up to 2x-3x cheaper.
 
 For use-case example you can visit Aletheo [repo](https://github.com/SamPorter1984/Aletheo/blob/main/contracts/CampaignMarket.sol). I could see some more use-cases: game settings/statistics? Which for some reason play a role in decision making for decentralized crowd funding or bets in the game?
 
