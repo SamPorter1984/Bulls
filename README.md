@@ -1,6 +1,6 @@
 # Bulls library
 
-It can pack and unpack booleans in uints making it potentially 8x cheaper.
+It can pack and unpack booleans in uints making it up to 3x-4x cheaper.
 
 If you want something a little bit too complex for today' distributed technology capabilities and you want it to be cheap enough to be usable. If you need to get rid 'Stack too deep' in big structs. Or if you have an unhealthy obsession with optimization.
 
