@@ -37,7 +37,8 @@ contract LibTest {
 
     function testPackBooleans(bool[] memory bools) public pure returns (bool[] memory) {
         uint uintBools = bools.packBooleans();
-        return uintBools.extractBooleans(256);//256 is the power of 2 you should limit depending on the case to make the tx cheaper
+        //256 is the power of 2 you should limit it depending on the case to make the tx cheaper
+        return uintBools.extractBooleans(256);
     }
 }
 ```
