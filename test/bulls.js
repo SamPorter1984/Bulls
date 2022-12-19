@@ -4,7 +4,7 @@ const { ethers } = require('hardhat');
 
 const { bulls07Fixture, bulls08Fixture } = require('./fixtures/libFixtures.js');
 
-const ITERATIONS = 1;
+const ITERATIONS = 10;
 
 describe('Bulls solc 0.7.x', function () {
   let lib = {};
@@ -129,7 +129,7 @@ describe('Bulls solc 0.8.x', function () {
     }
   });
   describe('sstoreSeparate256BoolsGasTest', function () {
-    it(' is insane', async function () {
+    it('actually not that expensive', async function () {
       const receipt = await (await lib.sstoreSeparate256BoolsGasTest()).wait();
       console.log('        tx which stores separate 256 bools took ' + receipt.cumulativeGasUsed + ' gas.');
     });
