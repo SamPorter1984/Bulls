@@ -9,7 +9,7 @@ contract LibTest {
 
     function testPackBooleans(bool[] memory bools) public pure returns (bool[] memory) {
         uint uintBools = bools.packBooleans();
-        return uintBools.extractBooleans(bools.length);
+        return uintBools.extBools();
     }
 
     uint sstoreTest;
@@ -26,7 +26,7 @@ contract LibTest {
     uint makeItIntoSomeBasicTransaction;
 
     function sloadUintGasTest() public {
-        bool[] memory bools = sstoreTest.extractBooleans(256);
+        bool[] memory bools = sstoreTest.extBools();
         uint result;
         for (uint n = 0; n < bools.length; n++) {
             if (bools[n]) {
