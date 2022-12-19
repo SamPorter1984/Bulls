@@ -38,6 +38,7 @@ contract LibTest {
     function testPackBooleans(bool[] memory bools) public pure returns (bool[] memory) {
         uint uintBools = bools.packBooleans();
         //256 is the power of 2 you should limit it depending on the case to make the tx cheaper
+        //in cases when you want to unpack only uint32, pass uint32, however it wont break if you keep it at max 
         return uintBools.extractBooleans(256);
     }
 }
