@@ -43,7 +43,7 @@ contract LibTest {
 }
 ```
 
-And in case you need a cheaper compiler, 0.7.6 version is also present:
+And in case you need a cheaper(in general) compiler, 0.7.6 version is also present:
 
 ```
 pragma solidity ^0.7.6;
