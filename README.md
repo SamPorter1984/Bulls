@@ -23,7 +23,7 @@ A bit counter intuitive for some, but storing 256 booleans as is is actually qui
 tx which stores separate 256 bools took 198097 gas.
 ```
 
-Vs 277204 gas in 0.7.x. Tests however, use external library. Calling another contract is a luxury today, and that's not the only thing you can fix to make user experience better.
+Vs 277204 gas in 0.7.x. Tests however, use bulls as external library. Calling another contract is a luxury today, and that's not the only thing you can fix to make user experience better.
 
 ## How to use:
 
