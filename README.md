@@ -44,12 +44,15 @@ contract LibTest {
         return uintBools.extBools();
     }
 
-    function testPackAndUnpackBooleansWithUint(bool[] memory bools, uint n, uint base, uint bitSize) public pure returns (bool[] memory, uint) {
+    function testPackAndUnpackBooleansWithUint(bool[] memory bools, uint n, uint base, uint bitSize)
+    public pure returns (bool[] memory, uint) {
         // n = uint value to store with booleans
-        // base = size of uintStore, so it wouldn't always treat say, 0 and 5 booleans as uint8. Either 8,16,32,64,128 or 256
+        // base = size of uintStore, so it wouldn't always treat say, 0 and 5 booleans as uint8.
+        // Either 8,16,32,64,128 or 256
         // otherwise extracting wouldn't work correctly
         uint uintStore = bools.packBoolsWithUint(n, base);
-        // bitSize = how many bits stored uint value takes, example: uint119 takes 119 bits. Without it there is no way to know what's uint and what's booleans
+        // bitSize = how many bits stored uint value takes, example: uint119 takes 119 bits.
+        // Without it there is no way to know what's uint and what's booleans
         (bool[] memory extBools, uint z) = uintStore.extBoolsWithUint(bitSize);
         return (extBools, z);
     }
@@ -71,7 +74,8 @@ function testPackAndUnpackBooleans(bool[] memory bools) public pure returns (boo
         return uintBools.extBools();
     }
 
-    function testPackAndUnpackBooleansWithUint(bool[] memory bools, uint n, uint base, uint bitSize) public pure returns (bool[] memory, uint) {
+    function testPackAndUnpackBooleansWithUint(bool[] memory bools, uint n, uint base, uint bitSize)
+    public pure returns (bool[] memory, uint) {
         uint uintStore = bools.packBoolsWithUint(n, base);
         (bool[] memory extBools, uint z) = uintStore.extBoolsWithUint(bitSize);
         return (extBools, z);
