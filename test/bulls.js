@@ -5,7 +5,7 @@ const { ethers } = require('hardhat');
 const { bulls04Fixture, bulls05Fixture, bulls06Fixture, bulls07Fixture, bulls08Fixture } = require('./fixtures/libFixtures.js');
 
 const ITERATIONS = 10;
-
+/*
 describe('\n \n Bulls solc 0.4.x', async function () {
   await allTestsForFixture(bulls04Fixture);
 });
@@ -17,7 +17,7 @@ describe('\n \n Bulls solc 0.5.x', async function () {
 describe('\n \n Bulls solc 0.6.x', async function () {
   await allTestsForFixture(bulls06Fixture);
 });
-
+*/
 describe('\n \n Bulls solc 0.7.x', async function () {
   await allTestsForFixture(bulls07Fixture);
 });

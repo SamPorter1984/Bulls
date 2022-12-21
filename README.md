@@ -82,3 +82,5 @@ function testPackAndUnpackBooleans(bool[] memory bools) public pure returns (boo
     }
 }
 ```
+
+I would suggest you to run tests to learn in which way you can best save users' gas. Contributions and pool requests are welcome.
