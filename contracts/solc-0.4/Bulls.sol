@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Author: SamPorter1984
 
-pragma solidity ^0.7.6;
-import 'hardhat/console.sol';
+pragma solidity ^0.4.18;
 
 library Bulls {
     function packBools(bool[] memory bools) internal pure returns (uint z) {

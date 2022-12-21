@@ -1,21 +1,40 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
-
 import './Bulls.sol';
 
 contract LibTest {
-    using {Bulls.extBools} for uint;
-    using {Bulls.packBools} for bool[];
+    using {Bulls.extBools, Bulls.extBoolsWithUint} for uint;
+    using {Bulls.packBools, Bulls.packBoolsWithUint} for bool[];
 
-    function testPackBooleans(bool[] memory bools) public pure returns (bool[] memory) {
+    function testPackAndUnpackBooleans(bool[] memory bools) public pure returns (bool[] memory) {
         uint uintBools = bools.packBools();
         return uintBools.extBools();
     }
 
+    function testPackAndUnpackBooleansWithUint(bool[] memory bools, uint n, uint base, uint bitSize) public pure returns (bool[] memory, uint) {
+        uint uintStore = bools.packBoolsWithUint(n, base);
+        (bool[] memory extBools, uint z) = uintStore.extBoolsWithUint(bitSize);
+        return (extBools, z);
+    }
+
+    struct TestStruct {
+        uint240 sstoreTest240;
+        bool b;
+        bool bb;
+        uint256 sstoreTest256;
+        bool bbb;
+        bool bbbb;
+    }
+
+    mapping(address => TestStruct) testStruct;
+
     uint sstoreTest;
+    uint240 sstoreTest240;
+    bool b;
+    bool bb;
     bool[] sstoreBools;
 
-    function sstoreUintGasTest(bool[] memory bools) public {
+    function sstoreBooleansPackedGasTest(bool[] memory bools) public {
         sstoreTest = bools.packBools();
     }
 
@@ -23,13 +42,29 @@ contract LibTest {
         sstoreBools = bools;
     }
 
-    uint makeItIntoSomeBasicTransaction;
+    function sstoreBoolsAndUintPackedGasTest(bool[] memory bools, uint n, uint base) public {
+        sstoreTest = bools.packBoolsWithUint(n, base);
+    }
 
-    function sloadUintGasTest() public {
+    uint makeItIntoSomeBasicTransaction;
+    uint makeItIntoSomeBasicTransaction1;
+
+    function sloadPackedBoolsAndExtGasTest() public {
         bool[] memory bools = sstoreTest.extBools();
         uint result;
         for (uint n = 0; n < bools.length; n++) {
             if (bools[n]) {
+                result += 11111111111;
+            }
+        }
+        makeItIntoSomeBasicTransaction = result;
+    }
+
+    function sloadPackedBoolsAndUintAndExtGasTest(uint bitSize) public {
+        (bool[] memory extBools, uint z) = sstoreTest.extBoolsWithUint(bitSize);
+        uint result = z;
+        for (uint n = 0; n < extBools.length; n++) {
+            if (extBools[n]) {
                 result += 11111111111;
             }
         }
@@ -45,6 +80,40 @@ contract LibTest {
             }
         }
         makeItIntoSomeBasicTransaction = result;
+    }
+
+    function sstore2BoolsAndUintConventionally(uint8 base) public {
+        testStruct[msg.sender].sstoreTest240 = uint240(2 ** (base - 1));
+        testStruct[msg.sender].b = true;
+        testStruct[msg.sender].bb = true;
+    }
+
+    function sload2BoolsAndUintConventionally() public {
+        uint result = testStruct[msg.sender].sstoreTest240;
+        if (testStruct[msg.sender].b) {
+            result += 2 ** 127;
+        }
+        if (testStruct[msg.sender].bb) {
+            result += 2 ** 127;
+        }
+        makeItIntoSomeBasicTransaction = result;
+    }
+
+    function sstore2BoolsAndUint256Conventionally(uint8 base) public {
+        testStruct[msg.sender].sstoreTest256 = 2 ** (base - 1);
+        testStruct[msg.sender].bbb = true;
+        testStruct[msg.sender].bbbb = true;
+    }
+
+    function sload2BoolsAndUint256Conventionally() public {
+        uint result = testStruct[msg.sender].sstoreTest256;
+        if (testStruct[msg.sender].bbb) {
+            result += 2 ** 127;
+        }
+        if (testStruct[msg.sender].bbbb) {
+            result += 2 ** 127;
+        }
+        makeItIntoSomeBasicTransaction1 = result;
     }
 
     bool b0;

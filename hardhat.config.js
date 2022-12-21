@@ -21,6 +21,33 @@ module.exports = {
           },
         },
       },
+      {
+        version: '0.4.18',
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 6284,
+          },
+        },
+      },
+      {
+        version: '0.5.6',
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 6284,
+          },
+        },
+      },
+      {
+        version: '0.6.5',
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 6284,
+          },
+        },
+      },
     ],
   },
 };

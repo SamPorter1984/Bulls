@@ -1,7 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.7.6;
-
-import 'hardhat/console.sol';
+pragma solidity ^0.5.6;
 
 import './Bulls.sol';
 
@@ -16,7 +14,9 @@ contract LibTest {
 
     function testPackAndUnpackBooleansWithUint(bool[] memory bools, uint n, uint base, uint bitSize) public pure returns (bool[] memory, uint) {
         uint uintStore = bools.packBoolsWithUint(n, base);
-        (bool[] memory extBools, uint z) = uintStore.extBoolsWithUint(bitSize);
+        bool[] memory extBools;
+        uint z;
+        (extBools, z) = uintStore.extBoolsWithUint(bitSize);
         return (extBools, z);
     }
 
@@ -32,7 +32,7 @@ contract LibTest {
     mapping(address => TestStruct) testStruct;
 
     uint sstoreTest;
-    uint240 sstoreTest240;
+    uint128 sstoreTest128;
     bool b;
     bool bb;
     bool[] sstoreBools;
@@ -64,7 +64,9 @@ contract LibTest {
     }
 
     function sloadPackedBoolsAndUintAndExtGasTest(uint bitSize) public {
-        (bool[] memory extBools, uint z) = sstoreTest.extBoolsWithUint(bitSize);
+        bool[] memory extBools;
+        uint z;
+        (extBools, z) = sstoreTest.extBoolsWithUint(bitSize);
         uint result = z;
         for (uint n = 0; n < extBools.length; n++) {
             if (extBools[n]) {
@@ -91,14 +93,11 @@ contract LibTest {
         testStruct[msg.sender].bb = true;
     }
 
-    function sstore2BoolsAndUint256Conventionally(uint8 base) public {
-        testStruct[msg.sender].sstoreTest256 = 2 ** (base - 1);
-        testStruct[msg.sender].bbb = true;
-        testStruct[msg.sender].bbbb = true;
-    }
-
     function sload2BoolsAndUintConventionally() public {
-        uint result = testStruct[msg.sender].sstoreTest240;
+        uint result;
+        if (testStruct[msg.sender].sstoreTest240 > 0) {
+            result = 2 ** 128 - 1;
+        }
         if (testStruct[msg.sender].b) {
             result += 2 ** 127;
         }
@@ -106,6 +105,12 @@ contract LibTest {
             result += 2 ** 127;
         }
         makeItIntoSomeBasicTransaction = result;
+    }
+
+    function sstore2BoolsAndUint256Conventionally(uint8 base) public {
+        testStruct[msg.sender].sstoreTest256 = 2 ** (base - 1);
+        testStruct[msg.sender].bbb = true;
+        testStruct[msg.sender].bbbb = true;
     }
 
     function sload2BoolsAndUint256Conventionally() public {
