@@ -1,6 +1,6 @@
 # Bulls library
 
-It can store you an uint 250 and 6 booleans in one uint for example. It can pack and unpack booleans in uints making sstore 50-300% cheaper depending on the case. Personal bitmap implementation and a research I needed to improve Aletheo codebase. Currently looking at efficiency of math vs bit shifting, results are interesting and a bit inconclusive:
+It can store you an uint 250 and 6 booleans in one uint for example. It can pack and unpack booleans in uints making sstore 50-300% cheaper depending on the case. Personal bitmap implementation and a research I needed to improve Aletheo codebase. Currently looking at efficiency of math vs bit shifting, results are interesting:
 
 ```
     math: tx to pack uint254 and 2 booleans in uint256 and sstore it took 45449 gas.
