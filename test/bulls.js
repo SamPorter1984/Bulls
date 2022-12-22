@@ -4,7 +4,7 @@ const { ethers } = require('hardhat');
 
 const { bulls04Fixture, bulls05Fixture, bulls06Fixture, bulls07Fixture, bulls08Fixture } = require('./fixtures/libFixtures.js');
 
-const ITERATIONS = 10;
+const ITERATIONS = 50;
 /*
 describe('\n \n Bulls solc 0.4.x', async function () {
   await allTestsForFixture(bulls04Fixture);
@@ -42,7 +42,27 @@ async function allTestsForFixture(fixture) {
             rand == 0 ? (bools[i] = false) : (bools[i] = true);
           }
           const res = await lib.testPackAndUnpackBooleans(bools);
-          for (let i = 0; i < res.length; i++) {
+          expect(res.length, 'array length dont match').to.equal(bools.length);
+          for (let i = 0; i < bools.length; i++) {
+            expect(res[i]).to.equal(bools[i]);
+          }
+        }
+      });
+    }
+  });
+
+  describe('\n testPackAndUnpackBooleansBitShift(bool[] memory bools)', function () {
+    for (let POWER = 8; POWER <= 256; POWER *= 2) {
+      it(ITERATIONS + ' pseudo random iterations to pack and unpack ' + POWER + ' booleans in uint' + POWER + ' and compare io', async function () {
+        for (let n = 0; n < ITERATIONS; n++) {
+          let bools = [];
+          for (let i = 0; i < POWER; i++) {
+            let rand = Math.floor(Math.random() * 2);
+            rand == 0 ? (bools[i] = false) : (bools[i] = true);
+          }
+          const res = await lib.testPackAndUnpackBooleansBitShift(bools);
+          expect(res.length, 'array length dont match').to.equal(bools.length);
+          for (let i = 0; i < bools.length; i++) {
             expect(res[i]).to.equal(bools[i]);
           }
         }
@@ -60,27 +80,23 @@ async function allTestsForFixture(fixture) {
           }
           const receipt = await (await lib.sstoreBooleansPackedGasTest(bools)).wait();
           console.log('');
-          console.log('        tx to pack ' + POWER + ' booleans in uint' + POWER + ' and SSTORE it took ' + receipt.cumulativeGasUsed + ' gas.');
-          const receipt1 = await (await lib.sloadPackedBoolsAndExtGasTest()).wait();
-          console.log('        SLOAD uint' + POWER + ', unpack it and SSTORE an unrelated uint took ' + receipt1.cumulativeGasUsed + ' gas.');
-        }
-      });
-    }
-  });
+          console.log('        math:tx to pack ' + POWER + ' booleans in uint' + POWER + ' and SSTORE it took ' + receipt.cumulativeGasUsed + ' gas.');
+          const receipt1 = await (await lib.sloadPackedBoolsAndExtGasTest(POWER)).wait();
+          console.log('        math:SLOAD uint' + POWER + ', unpack it and SSTORE an unrelated uint took ' + receipt1.cumulativeGasUsed + ' gas.');
 
-  describe('\n sstoreBoolsGasTest and sloadBoolsGasTest', function () {
-    for (let POWER = 8; POWER <= 256; POWER *= 2) {
-      it(1 + ' only true iterations for ' + POWER + ' booleans in bool[] storage', async function () {
-        for (let n = 0; n < 1; n++) {
-          let bools = [];
-          for (let i = 0; i < POWER; i++) {
-            bools[i] = true;
+          const receipt2 = await (await lib.sstoreBooleansPackedBitShiftGasTest(bools)).wait();
+          console.log('        bit shift:tx to pack ' + POWER + ' booleans in uint' + POWER + ' and SSTORE it took ' + receipt2.cumulativeGasUsed + ' gas.');
+          const receipt3 = await (await lib.sloadPackedBoolsAndExtBitShiftGasTest(POWER)).wait();
+          console.log('        bit shift:SLOAD uint' + POWER + ', unpack it and SSTORE an unrelated uint took ' + receipt3.cumulativeGasUsed + ' gas.');
+
+          const receipt4 = await (await lib.sstoreBoolsGasTest(bools)).wait();
+          console.log('        tx to simply SSTORE bool[' + POWER + '] conventionally took ' + receipt4.cumulativeGasUsed + ' gas.');
+          const receipt5 = await (await lib.sloadBoolsGasTest()).wait();
+          console.log('        SLOAD bool[' + POWER + '] and SSTORE an unrelated uint took ' + receipt5.cumulativeGasUsed + ' gas.');
+          if (POWER == 256) {
+            const receipt = await (await lib.sstoreSeparate256BoolsGasTest()).wait();
+            console.log('        tx which SSTORE separate 256 bools took ' + receipt.cumulativeGasUsed + ' gas.');
           }
-          console.log('');
-          const receipt = await (await lib.sstoreBoolsGasTest(bools)).wait();
-          console.log('        tx to simply SSTORE bool[' + POWER + '] conventionally took ' + receipt.cumulativeGasUsed + ' gas.');
-          const receipt1 = await (await lib.sloadBoolsGasTest()).wait();
-          console.log('        SLOAD bool[' + POWER + '] and SSTORE an unrelated uint took ' + receipt1.cumulativeGasUsed + ' gas.');
         }
       });
     }
@@ -92,19 +108,36 @@ async function allTestsForFixture(fixture) {
         for (let n = 0; n < ITERATIONS; n++) {
           let bools = [];
           let bitSize = Math.floor(Math.random() * POWER);
-          //console.log('bitSize:' + bitSize);
           let someNumber = ethers.BigNumber.from(2).pow(bitSize).sub(1);
-          //console.log('someNumber:' + someNumber);
           for (let i = bitSize; i < POWER; i++) {
             let rand = Math.floor(Math.random() * 2);
             rand == 0 ? bools.push(false) : bools.push(true);
           }
-          //console.log('bools:' + bools);
           const res = await lib.testPackAndUnpackBooleansWithUint(bools, someNumber, POWER, bitSize);
-          //console.log(res);
           expect(res[1]).to.equal(someNumber);
-          for (let i = 0; i < res[1].length; i++) {
-            expect(res[1][i]).to.equal(bools[i]);
+          for (let i = 0; i < res[0].length; i++) {
+            expect(res[0][i]).to.equal(bools[i]);
+          }
+        }
+      });
+    }
+  });
+
+  describe('\n testPackAndUnpackBooleansWithUintBitShift(bool[] memory bools, uint n)', function () {
+    for (let POWER = 8; POWER <= 256; POWER *= 2) {
+      it(ITERATIONS + ' pseudo random iterations for 1-' + POWER + ' booleans and uint1-' + POWER + ' in uint' + POWER, async function () {
+        for (let n = 0; n < ITERATIONS; n++) {
+          let bools = [];
+          let bitSize = Math.floor(Math.random() * POWER);
+          let someNumber = ethers.BigNumber.from(2).pow(bitSize).sub(1);
+          for (let i = bitSize; i < POWER; i++) {
+            let rand = Math.floor(Math.random() * 2);
+            rand == 0 ? bools.push(false) : bools.push(true);
+          }
+          const res = await lib.testPackAndUnpackBooleansWithUintBitShift(bools, someNumber, POWER);
+          expect(res[1]).to.equal(someNumber);
+          for (let i = 0; i < res[0].length; i++) {
+            expect(res[0][i]).to.equal(bools[i]);
           }
         }
       });
@@ -116,7 +149,7 @@ async function allTestsForFixture(fixture) {
       it(1 + ' only true iterations for 2 booleans and max uint' + (POWER - 2) + ' in uint' + POWER, async function () {
         for (let n = 0; n < 1; n++) {
           let bools = [];
-          let bitSize = POWER;
+          let bitSize = POWER - 2;
           let someNumber = ethers.BigNumber.from(2)
             .pow(POWER - 2)
             .sub(1);
@@ -125,31 +158,31 @@ async function allTestsForFixture(fixture) {
           }
           const receipt = await (await lib.sstoreBoolsAndUintPackedGasTest(bools, someNumber, POWER)).wait();
           console.log('');
-          console.log('        tx to pack uint' + (POWER - 2) + ' and 2 booleans in uint' + POWER + ' and sstore it took ' + receipt.cumulativeGasUsed + ' gas.');
+          console.log('        math: tx to pack uint' + (POWER - 2) + ' and 2 booleans in uint' + POWER + ' and sstore it took ' + receipt.cumulativeGasUsed + ' gas.');
           const receipt1 = await (await lib.sloadPackedBoolsAndUintAndExtGasTest(bitSize)).wait();
-          console.log('        SLOAD uint' + (POWER - 2) + ' and 2 booleans, unpack it and SSTORE an unrelated uint took ' + receipt1.cumulativeGasUsed + ' gas.');
+          if (receipt1.status == 0) {
+            console.log('someNumber:' + someNumber);
+            console.log('bitSize:' + bitSize);
+            console.log('bools:' + bools);
+          }
+          console.log('        math: SLOAD uint' + (POWER - 2) + ' and 2 booleans, unpack and SSTORE an unrelated uint took ' + receipt1.cumulativeGasUsed + ' gas.');
+
+          const receipt2 = await (await lib.sstoreBoolsAndUintPackedBitShiftGasTest(bools, someNumber, POWER)).wait();
+          console.log('        bit shift: tx to pack uint' + (POWER - 2) + ' and 2 booleans in uint' + POWER + ' and sstore it took ' + receipt2.cumulativeGasUsed + ' gas.');
+          const receipt3 = await (await lib.sloadPackedBoolsAndUintAndExtBitShiftGasTest(bools.length, POWER)).wait();
+          console.log('        bit shift: SLOAD uint' + (POWER - 2) + ' and 2 booleans, unpack it and SSTORE an unrelated uint took ' + receipt3.cumulativeGasUsed + ' gas.');
+          if (POWER == 256) {
+            const receipt = await (await lib.sstore2BoolsAndUint240Conventionally(128)).wait();
+            console.log('        tx to simply SSTORE uint240 and 2 separate bools conventionally took ' + receipt.cumulativeGasUsed + ' gas.');
+            const receipt1 = await (await lib.sload2BoolsAndUint240Conventionally()).wait();
+            console.log('        SLOAD uint240 and 2 bools conventionally, and then SSTORE an unrelated uint took ' + receipt1.cumulativeGasUsed + ' gas.');
+            const receipt2 = await (await lib.sstore2BoolsAndUint256Conventionally(128)).wait();
+            console.log('        tx to simply SSTORE uint256 and 2 separate bools conventionally took ' + receipt2.cumulativeGasUsed + ' gas.');
+            const receipt3 = await (await lib.sload2BoolsAndUint256Conventionally()).wait();
+            console.log('        SLOAD uint256 and 2 bools conventionally, and then SSTORE an unrelated uint took ' + receipt3.cumulativeGasUsed + ' gas.');
+          }
         }
       });
     }
-  });
-
-  describe('\n sstoreBoolsGasTest and sloadBoolsGasTest', function () {
-    it(1 + ' only true iterations for uint128 and 2 separate booleans storage', async function () {
-      const receipt = await (await lib.sstore2BoolsAndUintConventionally(128)).wait();
-      console.log('        tx to simply SSTORE uint128 and 2 separate bools conventionally took ' + receipt.cumulativeGasUsed + ' gas.');
-      const receipt1 = await (await lib.sload2BoolsAndUintConventionally()).wait();
-      console.log('        SLOAD uint240 and 2 bools conventionally, and then SSTORE an unrelated uint took ' + receipt1.cumulativeGasUsed + ' gas.');
-      const receipt2 = await (await lib.sstore2BoolsAndUint256Conventionally(128)).wait();
-      console.log('        tx to simply SSTORE uint256 and 2 separate bools conventionally took ' + receipt2.cumulativeGasUsed + ' gas.');
-      const receipt3 = await (await lib.sload2BoolsAndUint256Conventionally()).wait();
-      console.log('        SLOAD uint256 and 2 bools conventionally, and then SSTORE an unrelated uint took ' + receipt3.cumulativeGasUsed + ' gas.');
-    });
-  });
-
-  describe('\n sstoreSeparate256BoolsGasTest', function () {
-    it(' is insane', async function () {
-      const receipt = await (await lib.sstoreSeparate256BoolsGasTest()).wait();
-      console.log('        tx which SSTORE separate 256 bools took ' + receipt.cumulativeGasUsed + ' gas.');
-    });
   });
 }

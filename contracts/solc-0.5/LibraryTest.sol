@@ -1,24 +1,13 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.5.6;
+pragma solidity ^0.7.6;
+
+import 'hardhat/console.sol';
 
 import './Bulls.sol';
 
 contract LibTest {
     using Bulls for uint;
     using Bulls for bool[];
-
-    function testPackAndUnpackBooleans(bool[] memory bools) public pure returns (bool[] memory) {
-        uint uintBools = bools.packBools();
-        return uintBools.extBools();
-    }
-
-    function testPackAndUnpackBooleansWithUint(bool[] memory bools, uint n, uint base, uint bitSize) public pure returns (bool[] memory, uint) {
-        uint uintStore = bools.packBoolsWithUint(n, base);
-        bool[] memory extBools;
-        uint z;
-        (extBools, z) = uintStore.extBoolsWithUint(bitSize);
-        return (extBools, z);
-    }
 
     struct TestStruct {
         uint240 sstoreTest240;
@@ -30,15 +19,46 @@ contract LibTest {
     }
 
     mapping(address => TestStruct) testStruct;
-
+    uint makeItIntoSomeBasicTransaction;
+    uint makeItIntoSomeBasicTransactionBitShift;
+    uint makeItIntoSomeBasicTransactionConv;
+    uint makeItIntoSomeBasicTransactionConv1;
     uint sstoreTest;
-    uint128 sstoreTest128;
+    uint sstoreTestBitShift;
+    uint240 sstoreTest240;
     bool b;
     bool bb;
     bool[] sstoreBools;
 
+    function testPackAndUnpackBooleans(bool[] memory bools) public pure returns (bool[] memory) {
+        uint uintBools = bools.packBools();
+        return uintBools.extBools(bools.length);
+    }
+
+    function testPackAndUnpackBooleansBitShift(bool[] memory bools) public pure returns (bool[] memory) {
+        uint uintBools = bools.packBoolsBitShift();
+        return uintBools.extBoolsBitShift(bools.length);
+    }
+
+    function testPackAndUnpackBooleansWithUint(bool[] memory bools, uint n, uint base, uint bitSize) public pure returns (bool[] memory, uint) {
+        uint uintStore = bools.packBoolsWithUint(n, base);
+        (bool[] memory extBools, uint z) = uintStore.extBoolsWithUint(bitSize);
+        return (extBools, z);
+    }
+
+    function testPackAndUnpackBooleansWithUintBitShift(bool[] memory bools, uint n, uint base) public pure returns (bool[] memory, uint) {
+        uint uintStore = bools.packBoolsWithUintBitShift(n, base);
+        (bool[] memory extBools, uint z) = uintStore.extBoolsWithUintBitShift(bools.length, base);
+        return (extBools, z);
+    }
+
+    //sstore
     function sstoreBooleansPackedGasTest(bool[] memory bools) public {
         sstoreTest = bools.packBools();
+    }
+
+    function sstoreBooleansPackedBitShiftGasTest(bool[] memory bools) public {
+        sstoreTestBitShift = bools.packBoolsBitShift();
     }
 
     function sstoreBoolsGasTest(bool[] memory bools) public {
@@ -49,11 +69,26 @@ contract LibTest {
         sstoreTest = bools.packBoolsWithUint(n, base);
     }
 
-    uint makeItIntoSomeBasicTransaction;
-    uint makeItIntoSomeBasicTransaction1;
+    function sstoreBoolsAndUintPackedBitShiftGasTest(bool[] memory bools, uint n, uint base) public {
+        sstoreTestBitShift = bools.packBoolsWithUintBitShift(n, base);
+    }
 
-    function sloadPackedBoolsAndExtGasTest() public {
-        bool[] memory bools = sstoreTest.extBools();
+    function sstore2BoolsAndUint240Conventionally(uint8 base) public {
+        testStruct[msg.sender].sstoreTest240 = uint240(2 ** (base - 1));
+        testStruct[msg.sender].b = true;
+        testStruct[msg.sender].bb = true;
+    }
+
+    function sstore2BoolsAndUint256Conventionally(uint8 base) public {
+        testStruct[msg.sender].sstoreTest256 = 2 ** (base - 1);
+        testStruct[msg.sender].bbb = true;
+        testStruct[msg.sender].bbbb = true;
+    }
+
+    //sload
+    function sloadPackedBoolsAndExtGasTest(uint length) public {
+        uint memoryTest = sstoreTest;
+        bool[] memory bools = memoryTest.extBools(length);
         uint result;
         for (uint n = 0; n < bools.length; n++) {
             if (bools[n]) {
@@ -63,10 +98,20 @@ contract LibTest {
         makeItIntoSomeBasicTransaction = result;
     }
 
+    function sloadPackedBoolsAndExtBitShiftGasTest(uint length) public {
+        uint memoryTest = sstoreTestBitShift;
+        bool[] memory bools = memoryTest.extBoolsBitShift(length);
+        uint result;
+        for (uint n = 0; n < bools.length; n++) {
+            if (bools[n]) {
+                result += 11111111111;
+            }
+        }
+        makeItIntoSomeBasicTransactionBitShift = result;
+    }
+
     function sloadPackedBoolsAndUintAndExtGasTest(uint bitSize) public {
-        bool[] memory extBools;
-        uint z;
-        (extBools, z) = sstoreTest.extBoolsWithUint(bitSize);
+        (bool[] memory extBools, uint z) = sstoreTest.extBoolsWithUint(bitSize);
         uint result = z;
         for (uint n = 0; n < extBools.length; n++) {
             if (extBools[n]) {
@@ -74,6 +119,18 @@ contract LibTest {
             }
         }
         makeItIntoSomeBasicTransaction = result;
+    }
+
+    function sloadPackedBoolsAndUintAndExtBitShiftGasTest(uint bitSize, uint msb) public {
+        (bool[] memory extBools, uint z) = sstoreTestBitShift.extBoolsWithUintBitShift(bitSize, msb);
+
+        uint result = z;
+        for (uint n = 0; n < extBools.length; n++) {
+            if (extBools[n]) {
+                result += 11111111111;
+            }
+        }
+        makeItIntoSomeBasicTransactionBitShift = result;
     }
 
     function sloadBoolsGasTest() public {
@@ -84,33 +141,18 @@ contract LibTest {
                 result += 11111111111;
             }
         }
-        makeItIntoSomeBasicTransaction = result;
+        makeItIntoSomeBasicTransactionConv = result;
     }
 
-    function sstore2BoolsAndUintConventionally(uint8 base) public {
-        testStruct[msg.sender].sstoreTest240 = uint240(2 ** (base - 1));
-        testStruct[msg.sender].b = true;
-        testStruct[msg.sender].bb = true;
-    }
-
-    function sload2BoolsAndUintConventionally() public {
-        uint result;
-        if (testStruct[msg.sender].sstoreTest240 > 0) {
-            result = 2 ** 128 - 1;
-        }
+    function sload2BoolsAndUint240Conventionally() public {
+        uint result = testStruct[msg.sender].sstoreTest240;
         if (testStruct[msg.sender].b) {
             result += 2 ** 127;
         }
         if (testStruct[msg.sender].bb) {
             result += 2 ** 127;
         }
-        makeItIntoSomeBasicTransaction = result;
-    }
-
-    function sstore2BoolsAndUint256Conventionally(uint8 base) public {
-        testStruct[msg.sender].sstoreTest256 = 2 ** (base - 1);
-        testStruct[msg.sender].bbb = true;
-        testStruct[msg.sender].bbbb = true;
+        makeItIntoSomeBasicTransactionConv = result;
     }
 
     function sload2BoolsAndUint256Conventionally() public {
@@ -121,9 +163,10 @@ contract LibTest {
         if (testStruct[msg.sender].bbbb) {
             result += 2 ** 127;
         }
-        makeItIntoSomeBasicTransaction1 = result;
+        makeItIntoSomeBasicTransactionConv1 = result;
     }
 
+    // sstop
     bool b0;
     bool b1;
     bool b2;
