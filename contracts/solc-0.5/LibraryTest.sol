@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.7.6;
+pragma solidity ^0.5.0;
 
 import 'hardhat/console.sol';
 
-import './Bulls.sol';
+import './UintStore.sol';
 
 contract LibTest {
-    using Bulls for uint;
-    using Bulls for bool[];
+    using UintStore for uint;
+    using UintStore for bool[];
 
     struct TestStruct {
         uint240 sstoreTest240;
@@ -41,13 +41,13 @@ contract LibTest {
     }
 
     function testPackAndUnpackBooleansWithUint(bool[] memory bools, uint n, uint base, uint bitSize) public pure returns (bool[] memory, uint) {
-        uint uintStore = bools.packBoolsWithUint(n, base);
+        uint uintStore = n.packBoolsWithUint(bools, base);
         (bool[] memory extBools, uint z) = uintStore.extBoolsWithUint(bitSize);
         return (extBools, z);
     }
 
     function testPackAndUnpackBooleansWithUintBitShift(bool[] memory bools, uint n, uint base) public pure returns (bool[] memory, uint) {
-        uint uintStore = bools.packBoolsWithUintBitShift(n, base);
+        uint uintStore = n.packBoolsWithUintBitShift(bools, base);
         (bool[] memory extBools, uint z) = uintStore.extBoolsWithUintBitShift(bools.length, base);
         return (extBools, z);
     }
@@ -66,11 +66,11 @@ contract LibTest {
     }
 
     function sstoreBoolsAndUintPackedGasTest(bool[] memory bools, uint n, uint base) public {
-        sstoreTest = bools.packBoolsWithUint(n, base);
+        sstoreTest = n.packBoolsWithUint(bools, base);
     }
 
     function sstoreBoolsAndUintPackedBitShiftGasTest(bool[] memory bools, uint n, uint base) public {
-        sstoreTestBitShift = bools.packBoolsWithUintBitShift(n, base);
+        sstoreTestBitShift = n.packBoolsWithUintBitShift(bools, base);
     }
 
     function sstore2BoolsAndUint240Conventionally(uint8 base) public {

@@ -2,33 +2,33 @@ const { loadFixture } = require('@nomicfoundation/hardhat-network-helpers');
 const { expect } = require('chai');
 const { ethers } = require('hardhat');
 
-const { bulls04Fixture, bulls05Fixture, bulls06Fixture, bulls07Fixture, bulls08Fixture } = require('./fixtures/libFixtures.js');
+const { uintStore04Fixture, uintStore05Fixture, uintStore06Fixture, uintStore07Fixture, uintStore08Fixture } = require('./fixtures/libFixtures.js');
 
 const ITERATIONS = 50;
 /*
-describe('\n \n Bulls solc 0.4.x', async function () {
-  await allTestsForFixture(bulls04Fixture);
+describe('\n \n UintStore solc 0.4.x', async function () {
+  await testsForFixture(uintStore04Fixture);
 });
 
-describe('\n \n Bulls solc 0.5.x', async function () {
-  await allTestsForFixture(bulls05Fixture);
+describe('\n \n UintStore solc 0.5.x', async function () {
+  await testsForFixture(uintStore05Fixture);
 });
 
-describe('\n \n Bulls solc 0.6.x', async function () {
-  await allTestsForFixture(bulls06Fixture);
+describe('\n \n UintStore solc 0.6.x', async function () {
+  await testsForFixture(uintStore06Fixture);
 });
 */
-describe('\n \n Bulls solc 0.7.x', async function () {
-  await allTestsForFixture(bulls07Fixture);
+describe('\n \n UintStore solc 0.7.x', async function () {
+  await testsForFixture(uintStore07Fixture);
 });
-
-describe('\n \n Bulls solc 0.8.x', async function () {
-  await allTestsForFixture(bulls08Fixture);
+/*
+describe('\n \n UintStore solc 0.8.x', async function () {
+  await testsForFixture(uintStore08Fixture);
 });
-
-async function allTestsForFixture(fixture) {
+*/
+async function testsForFixture(fixture) {
   let lib = {};
-  beforeEach('need POWER', async () => {
+  beforeEach('load fixture', async () => {
     lib = await loadFixture(fixture);
   });
 
@@ -49,7 +49,7 @@ async function allTestsForFixture(fixture) {
         }
       });
     }
-  });
+  }); /**/
 
   describe('\n testPackAndUnpackBooleansBitShift(bool[] memory bools)', function () {
     for (let POWER = 8; POWER <= 256; POWER *= 2) {
@@ -121,12 +121,13 @@ async function allTestsForFixture(fixture) {
         }
       });
     }
-  });
+  }); /**/
 
   describe('\n testPackAndUnpackBooleansWithUintBitShift(bool[] memory bools, uint n)', function () {
     for (let POWER = 8; POWER <= 256; POWER *= 2) {
       it(ITERATIONS + ' pseudo random iterations for 1-' + POWER + ' booleans and uint1-' + POWER + ' in uint' + POWER, async function () {
         for (let n = 0; n < ITERATIONS; n++) {
+          //console.log('iteration #' + n);
           let bools = [];
           let bitSize = Math.floor(Math.random() * POWER);
           let someNumber = ethers.BigNumber.from(2).pow(bitSize).sub(1);

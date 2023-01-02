@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.7.6;
+pragma solidity ^0.8.0;
 
 import 'hardhat/console.sol';
 
-import './Bulls.sol';
+import './UintStore.sol';
 
 contract LibTest {
-    using Bulls for uint;
-    using Bulls for bool[];
+    using UintStore for uint;
+    using UintStore for bool[];
 
     struct TestStruct {
         uint240 sstoreTest240;
@@ -30,34 +30,34 @@ contract LibTest {
     bool bb;
     bool[] sstoreBools;
 
-    function testPackAndUnpackBooleans(bool[] memory bools) public pure returns (bool[] memory) {
+    function testPackAndUnpackBooleans(bool[] calldata bools) public pure returns (bool[] memory) {
         uint uintBools = bools.packBools();
         return uintBools.extBools(bools.length);
     }
 
-    function testPackAndUnpackBooleansBitShift(bool[] memory bools) public pure returns (bool[] memory) {
+    function testPackAndUnpackBooleansBitShift(bool[] calldata bools) public pure returns (bool[] memory) {
         uint uintBools = bools.packBoolsBitShift();
         return uintBools.extBoolsBitShift(bools.length);
     }
 
-    function testPackAndUnpackBooleansWithUint(bool[] memory bools, uint n, uint base, uint bitSize) public pure returns (bool[] memory, uint) {
-        uint uintStore = bools.packBoolsWithUint(n, base);
+    function testPackAndUnpackBooleansWithUint(bool[] calldata bools, uint n, uint base, uint bitSize) public pure returns (bool[] memory, uint) {
+        uint uintStore = n.packBoolsWithUint(bools, base);
         (bool[] memory extBools, uint z) = uintStore.extBoolsWithUint(bitSize);
         return (extBools, z);
     }
 
-    function testPackAndUnpackBooleansWithUintBitShift(bool[] memory bools, uint n, uint base) public pure returns (bool[] memory, uint) {
-        uint uintStore = bools.packBoolsWithUintBitShift(n, base);
+    function testPackAndUnpackBooleansWithUintBitShift(bool[] calldata bools, uint n, uint base) public pure returns (bool[] memory, uint) {
+        uint uintStore = n.packBoolsWithUintBitShift(bools, base);
         (bool[] memory extBools, uint z) = uintStore.extBoolsWithUintBitShift(bools.length, base);
         return (extBools, z);
     }
 
     //sstore
-    function sstoreBooleansPackedGasTest(bool[] memory bools) public {
+    function sstoreBooleansPackedGasTest(bool[] calldata bools) public {
         sstoreTest = bools.packBools();
     }
 
-    function sstoreBooleansPackedBitShiftGasTest(bool[] memory bools) public {
+    function sstoreBooleansPackedBitShiftGasTest(bool[] calldata bools) public {
         sstoreTestBitShift = bools.packBoolsBitShift();
     }
 
@@ -65,105 +65,123 @@ contract LibTest {
         sstoreBools = bools;
     }
 
-    function sstoreBoolsAndUintPackedGasTest(bool[] memory bools, uint n, uint base) public {
-        sstoreTest = bools.packBoolsWithUint(n, base);
+    function sstoreBoolsAndUintPackedGasTest(bool[] calldata bools, uint n, uint base) public {
+        sstoreTest = n.packBoolsWithUint(bools, base);
     }
 
-    function sstoreBoolsAndUintPackedBitShiftGasTest(bool[] memory bools, uint n, uint base) public {
-        sstoreTestBitShift = bools.packBoolsWithUintBitShift(n, base);
+    function sstoreBoolsAndUintPackedBitShiftGasTest(bool[] calldata bools, uint n, uint base) public {
+        sstoreTestBitShift = n.packBoolsWithUintBitShift(bools, base);
     }
 
     function sstore2BoolsAndUint240Conventionally(uint8 base) public {
-        testStruct[msg.sender].sstoreTest240 = uint240(2 ** (base - 1));
-        testStruct[msg.sender].b = true;
-        testStruct[msg.sender].bb = true;
+        unchecked {
+            testStruct[msg.sender].sstoreTest240 = uint240(2 ** (base - 1));
+            testStruct[msg.sender].b = true;
+            testStruct[msg.sender].bb = true;
+        }
     }
 
     function sstore2BoolsAndUint256Conventionally(uint8 base) public {
-        testStruct[msg.sender].sstoreTest256 = 2 ** (base - 1);
-        testStruct[msg.sender].bbb = true;
-        testStruct[msg.sender].bbbb = true;
+        unchecked {
+            testStruct[msg.sender].sstoreTest256 = 2 ** (base - 1);
+            testStruct[msg.sender].bbb = true;
+            testStruct[msg.sender].bbbb = true;
+        }
     }
 
     //sload
     function sloadPackedBoolsAndExtGasTest(uint length) public {
-        uint memoryTest = sstoreTest;
-        bool[] memory bools = memoryTest.extBools(length);
-        uint result;
-        for (uint n = 0; n < bools.length; n++) {
-            if (bools[n]) {
-                result += 11111111111;
+        unchecked {
+            uint memoryTest = sstoreTest;
+            bool[] memory bools = memoryTest.extBools(length);
+            uint result;
+            for (uint n = 0; n < bools.length; n++) {
+                if (bools[n]) {
+                    result += 11111111111;
+                }
             }
+            makeItIntoSomeBasicTransaction = result;
         }
-        makeItIntoSomeBasicTransaction = result;
     }
 
     function sloadPackedBoolsAndExtBitShiftGasTest(uint length) public {
-        uint memoryTest = sstoreTestBitShift;
-        bool[] memory bools = memoryTest.extBoolsBitShift(length);
-        uint result;
-        for (uint n = 0; n < bools.length; n++) {
-            if (bools[n]) {
-                result += 11111111111;
+        unchecked {
+            uint memoryTest = sstoreTestBitShift;
+            bool[] memory bools = memoryTest.extBoolsBitShift(length);
+            uint result;
+            for (uint n = 0; n < bools.length; n++) {
+                if (bools[n]) {
+                    result += 11111111111;
+                }
             }
+            makeItIntoSomeBasicTransactionBitShift = result;
         }
-        makeItIntoSomeBasicTransactionBitShift = result;
     }
 
     function sloadPackedBoolsAndUintAndExtGasTest(uint bitSize) public {
-        (bool[] memory extBools, uint z) = sstoreTest.extBoolsWithUint(bitSize);
-        uint result = z;
-        for (uint n = 0; n < extBools.length; n++) {
-            if (extBools[n]) {
-                result += 11111111111;
+        unchecked {
+            (bool[] memory extBools, uint z) = sstoreTest.extBoolsWithUint(bitSize);
+            uint result = z;
+            for (uint n = 0; n < extBools.length; n++) {
+                if (extBools[n]) {
+                    result += 11111111111;
+                }
             }
+            makeItIntoSomeBasicTransaction = result;
         }
-        makeItIntoSomeBasicTransaction = result;
     }
 
     function sloadPackedBoolsAndUintAndExtBitShiftGasTest(uint bitSize, uint msb) public {
-        (bool[] memory extBools, uint z) = sstoreTestBitShift.extBoolsWithUintBitShift(bitSize, msb);
+        unchecked {
+            (bool[] memory extBools, uint z) = sstoreTestBitShift.extBoolsWithUintBitShift(bitSize, msb);
 
-        uint result = z;
-        for (uint n = 0; n < extBools.length; n++) {
-            if (extBools[n]) {
-                result += 11111111111;
+            uint result = z;
+            for (uint n = 0; n < extBools.length; n++) {
+                if (extBools[n]) {
+                    result += 11111111111;
+                }
             }
+            makeItIntoSomeBasicTransactionBitShift = result;
         }
-        makeItIntoSomeBasicTransactionBitShift = result;
     }
 
     function sloadBoolsGasTest() public {
-        bool[] memory bools = sstoreBools;
-        uint result;
-        for (uint n = 0; n < bools.length; n++) {
-            if (bools[n]) {
-                result += 11111111111;
+        unchecked {
+            bool[] memory bools = sstoreBools;
+            uint result;
+            for (uint n = 0; n < bools.length; n++) {
+                if (bools[n]) {
+                    result += 11111111111;
+                }
             }
+            makeItIntoSomeBasicTransactionConv = result;
         }
-        makeItIntoSomeBasicTransactionConv = result;
     }
 
     function sload2BoolsAndUint240Conventionally() public {
-        uint result = testStruct[msg.sender].sstoreTest240;
-        if (testStruct[msg.sender].b) {
-            result += 2 ** 127;
+        unchecked {
+            uint result = testStruct[msg.sender].sstoreTest240;
+            if (testStruct[msg.sender].b) {
+                result += 2 ** 127;
+            }
+            if (testStruct[msg.sender].bb) {
+                result += 2 ** 127;
+            }
+            makeItIntoSomeBasicTransactionConv = result;
         }
-        if (testStruct[msg.sender].bb) {
-            result += 2 ** 127;
-        }
-        makeItIntoSomeBasicTransactionConv = result;
     }
 
     function sload2BoolsAndUint256Conventionally() public {
-        uint result = testStruct[msg.sender].sstoreTest256;
-        if (testStruct[msg.sender].bbb) {
-            result += 2 ** 127;
+        unchecked {
+            uint result = testStruct[msg.sender].sstoreTest256;
+            if (testStruct[msg.sender].bbb) {
+                result += 2 ** 127;
+            }
+            if (testStruct[msg.sender].bbbb) {
+                result += 2 ** 127;
+            }
+            makeItIntoSomeBasicTransactionConv1 = result;
         }
-        if (testStruct[msg.sender].bbbb) {
-            result += 2 ** 127;
-        }
-        makeItIntoSomeBasicTransactionConv1 = result;
     }
 
     // sstop

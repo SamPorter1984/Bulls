@@ -3,11 +3,11 @@ pragma solidity ^0.7.6;
 
 import 'hardhat/console.sol';
 
-import './Bulls.sol';
+import './UintStore.sol';
 
 contract LibTest {
-    using Bulls for uint;
-    using Bulls for bool[];
+    using UintStore for uint;
+    using UintStore for bool[];
 
     struct TestStruct {
         uint240 sstoreTest240;
@@ -30,47 +30,47 @@ contract LibTest {
     bool bb;
     bool[] sstoreBools;
 
-    function testPackAndUnpackBooleans(bool[] memory bools) public pure returns (bool[] memory) {
+    function testPackAndUnpackBooleans(bool[] calldata bools) public pure returns (bool[] memory) {
         uint uintBools = bools.packBools();
         return uintBools.extBools(bools.length);
     }
 
-    function testPackAndUnpackBooleansBitShift(bool[] memory bools) public pure returns (bool[] memory) {
+    function testPackAndUnpackBooleansBitShift(bool[] calldata bools) public pure returns (bool[] memory) {
         uint uintBools = bools.packBoolsBitShift();
         return uintBools.extBoolsBitShift(bools.length);
     }
 
-    function testPackAndUnpackBooleansWithUint(bool[] memory bools, uint n, uint base, uint bitSize) public pure returns (bool[] memory, uint) {
-        uint uintStore = bools.packBoolsWithUint(n, base);
+    function testPackAndUnpackBooleansWithUint(bool[] calldata bools, uint n, uint base, uint bitSize) public pure returns (bool[] memory, uint) {
+        uint uintStore = n.packBoolsWithUint(bools, base);
         (bool[] memory extBools, uint z) = uintStore.extBoolsWithUint(bitSize);
         return (extBools, z);
     }
 
-    function testPackAndUnpackBooleansWithUintBitShift(bool[] memory bools, uint n, uint base) public pure returns (bool[] memory, uint) {
-        uint uintStore = bools.packBoolsWithUintBitShift(n, base);
+    function testPackAndUnpackBooleansWithUintBitShift(bool[] calldata bools, uint n, uint base) public pure returns (bool[] memory, uint) {
+        uint uintStore = n.packBoolsWithUintBitShift(bools, base);
         (bool[] memory extBools, uint z) = uintStore.extBoolsWithUintBitShift(bools.length, base);
         return (extBools, z);
     }
 
     //sstore
-    function sstoreBooleansPackedGasTest(bool[] memory bools) public {
+    function sstoreBooleansPackedGasTest(bool[] calldata bools) public {
         sstoreTest = bools.packBools();
     }
 
-    function sstoreBooleansPackedBitShiftGasTest(bool[] memory bools) public {
+    function sstoreBooleansPackedBitShiftGasTest(bool[] calldata bools) public {
         sstoreTestBitShift = bools.packBoolsBitShift();
     }
 
-    function sstoreBoolsGasTest(bool[] memory bools) public {
+    function sstoreBoolsGasTest(bool[] calldata bools) public {
         sstoreBools = bools;
     }
 
-    function sstoreBoolsAndUintPackedGasTest(bool[] memory bools, uint n, uint base) public {
-        sstoreTest = bools.packBoolsWithUint(n, base);
+    function sstoreBoolsAndUintPackedGasTest(bool[] calldata bools, uint n, uint base) public {
+        sstoreTest = n.packBoolsWithUint(bools, base);
     }
 
-    function sstoreBoolsAndUintPackedBitShiftGasTest(bool[] memory bools, uint n, uint base) public {
-        sstoreTestBitShift = bools.packBoolsWithUintBitShift(n, base);
+    function sstoreBoolsAndUintPackedBitShiftGasTest(bool[] calldata bools, uint n, uint base) public {
+        sstoreTestBitShift = n.packBoolsWithUintBitShift(bools, base);
     }
 
     function sstore2BoolsAndUint240Conventionally(uint8 base) public {

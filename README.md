@@ -1,12 +1,12 @@
-# Bulls library
+# UintStore library
 
-It can store you an uint 250 and 6 booleans in one uint for example. It can pack and unpack booleans in uints making sstore 50-300% cheaper depending on the case. Personal bitmap implementation and a research I needed to improve Aletheo codebase. Currently looking at efficiency of math vs bit shifting, results are interesting:
+It can store you an uint 250 and 6 booleans in one uint for example. It can pack and unpack booleans in uints making sstore 50-300% cheaper depending on the case. Personal bitmap implementation and a small research I needed to improve Aletheo codebase. Currently looking at efficiency of math vs bit shifting, results are interesting:
 
 ```
     math: tx to pack uint254 and 2 booleans in uint256 and sstore it took 45449 gas.
     math: SLOAD uint254 and 2 booleans, unpack and SSTORE an unrelated uint took 46878 gas.
-    bit shift: tx to pack uint254 and 2 booleans in uint256 and sstore it took 57882 gas.
-    bit shift: SLOAD uint254 and 2 booleans, unpack it and SSTORE an unrelated uint took 59332 gas.
+    bit shift: tx to pack uint254 and 2 booleans in uint256 and sstore it took 46617 gas.
+    bit shift: SLOAD uint254 and 2 booleans, unpack it and SSTORE an unrelated uint took 46848 gas.
 ```
 
 This is while working only with booleans is cheaper for bit shifting:
@@ -25,7 +25,7 @@ Or you can have uint61 and 3 booleans stored in uint64.
 To test:
 
 ```
-git clone https://github.com/SamPorter1984/Bulls && cd bulls && npm run test
+git clone https://github.com/SamPorter1984/UintStore && cd UintStore && npm run test
 ```
 
 Here are some extreme examples from tests(simply storing an array of 256 booleans vs packing them and storing them as uint):
@@ -43,17 +43,17 @@ tx which stores separate 256 bools took 198097 gas.
 
 Vs 277204 gas in 0.7.x.
 
-bulls.js in test folder has tests for 0.4.x, 0.5.x, 0.6.x, 0.7.x, 0.8.x with first 3 commented out, so if you need them, edit the file.
+uintStore.js in test folder has tests for 0.4.x, 0.5.x, 0.6.x, 0.7.x, 0.8.x with first 3 commented out, so if you need them, edit the file.
 
 ## How to use:
 
 ```
 pragma solidity ^0.8.17;
-import './Bulls.sol';
+import './UintStore.sol';
 
 contract LibTest {
-    using Bulls for uint;
-    using Bulls for bool[];
+    using UintStore for uint;
+    using UintStore for bool[];
 
     uint uintBools = bools.packBools();//pass any amount up to 256
     // extract needs to know length, otherwise it might truncate array ending with all false

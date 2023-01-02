@@ -4,7 +4,7 @@
 pragma solidity ^0.7.6;
 import 'hardhat/console.sol';
 
-library Bulls {
+library UintStore {
     //math
     function packBools(bool[] memory bools) internal pure returns (uint z) {
         if (bools[0]) {
@@ -32,7 +32,7 @@ library Bulls {
         return bls;
     }
 
-    function packBoolsWithUint(bool[] memory bools, uint z, uint uintBase) internal pure returns (uint) {
+    function packBoolsWithUint(uint z, bool[] memory bools, uint uintBase) internal pure returns (uint) {
         uint x = uintBase - bools.length;
         for (uint i = 0; i < bools.length; i++) {
             if (bools[i]) {
@@ -84,7 +84,7 @@ library Bulls {
         return bls;
     }
 
-    function packBoolsWithUintBitShift(bool[] memory bools, uint z, uint msb) internal pure returns (uint) {
+    function packBoolsWithUintBitShift(uint z, bool[] memory bools, uint msb) internal pure returns (uint) {
         msb = mostSignificantBit(z);
         for (uint i = 0; i < bools.length; i++) {
             if (bools[i]) {
@@ -95,10 +95,13 @@ library Bulls {
     }
 
     function extBoolsWithUintBitShift(uint z, uint i, uint msb) internal pure returns (bool[] memory, uint) {
+        if (msb == 0) {
+            msb = mostSignificantBit(z);
+        }
         uint n = 0;
-        msb != i ? n = (z >> 0) & ((uint(1) << (msb - i)) - 1) : n;
+        msb != i ? n = z & ((uint(1) << (msb - i)) - 1) : n;
         bool[] memory bls = new bool[](i);
-        msb = mostSignificantBit(n);
+        msb -= i;
         while (i > 0) {
             --i;
             if ((z >> (i + msb)) & 1 == 1) {
@@ -108,11 +111,27 @@ library Bulls {
         return (bls, n);
     }
 
-    function mostSignificantBit(uint256 x) internal pure returns (uint256) {
+    function mostSignificantBit(uint256 z) internal pure returns (uint256) {
         uint i;
-        while (x > 0) {
-            ++i;
-            x >>= 1;
+        while (z > 0) {
+            if (z >> 64 != 0) {
+                i += 64;
+                z >>= 64;
+            } else if (z >> 32 != 0) {
+                i += 32;
+                z >>= 32;
+            } else if (z >> 16 != 0) {
+                i += 16;
+                z >>= 16;
+            } else if (z >> 8 != 0) {
+                i += 8;
+                z >>= 8;
+            } else {
+                while (z > 0) {
+                    i++;
+                    z >>= 1;
+                }
+            }
         }
         return i;
     }
