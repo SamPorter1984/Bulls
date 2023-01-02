@@ -84,3 +84,4 @@ I would suggest you to run tests to learn in which way you can best save users' 
 
 Issues:
 -might be reverting if asked to unpack 0 integer with booleans all false
+-bit shift tests fail for 0.4.x
